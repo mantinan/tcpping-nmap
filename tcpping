@@ -1,0 +1,27 @@
+#!/bin/sh
+
+#Quick thing to mimic tcpping but based on nmap instead of tcptraceroute
+
+LANG=C
+timeToWait=0.7
+
+if [ "$#" -ne 5 ]
+then
+   echo "$0" -C -x num ip port >&2
+else
+  NUM="$3"
+  IP="$4"
+  PORT="$5"
+  echo -n "$IP :"
+  while [ "$NUM" -gt 0 ]
+  do
+    time="$(nmap -Pn --host-timeout 400ms --max-rtt-timeout 400ms -p "$PORT" "$IP"|sed -n -e "s/Host is up (\(.*\)\.\([^s]*\)s latency)./\1\2/p" -e "s|^$PORT/tcp open.*|ok|p"|xargs)"
+    if [ "$time" = "${time%* ok}" ];then
+      printf " -"
+    else
+      printf " %.1f" "${time%* ok}"
+      sleep "$timeToWait"
+    fi
+    NUM=$((NUM-1))
+  done
+fi
