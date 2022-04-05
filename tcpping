@@ -15,11 +15,11 @@ else
   echo -n "$IP :"
   while [ "$NUM" -gt 0 ]
   do
-    time="$(nmap -Pn --host-timeout 400ms --max-rtt-timeout 400ms --max-retries 0 -p "$PORT" "$IP"|sed -n -e "s/Host is up (\(.*\)\.\([^s]*\)s latency)./\1\2/p" -e "s|^$PORT/tcp open.*|ok|p"|xargs)"
+    time="$(nmap -Pn --host-timeout 400ms --max-rtt-timeout 400ms --max-retries 0 -p "$PORT" "$IP"|sed -n -e "s/Host is up (\([^s]*\)s latency)./\1/p" -e "s|^$PORT/tcp open.*|ok|p"|xargs)"
     if [ "$time" = "${time%* ok}" ];then
-      printf " -"
+      echo -n " -"
     else
-      printf " %.1f" "${time%* ok}"
+      echo "${time%* ok}"|awk '{printf " %f", $1*1000}'
       sleep "$timeToWait"
     fi
     NUM=$((NUM-1))
